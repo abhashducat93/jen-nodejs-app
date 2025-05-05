@@ -1,6 +1,53 @@
-<target name="package" depends="build">
-  <zip destfile="${dist.dir}/app-${DSTAMP}.zip" 
-       basedir="." 
-       includes="**/*" 
-       excludes="node_modules/**, .git/**, build/**, dist/**"/>
-</target>
+<project name="NodeJSApp" default="deploy" basedir=".">
+    <!-- Properties -->
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir" location="dist"/>
+    
+    <!-- Clean previous builds -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+    
+    <!-- Initialize directories -->
+    <target name="init" depends="clean">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+    
+    <!-- Install dependencies -->
+    <target name="install-dependencies" depends="init">
+        <exec executable="npm" dir=".">
+            <arg value="install"/>
+        </exec>
+    </target>
+    
+    <!-- Run tests -->
+    <target name="test" depends="install-dependencies">
+        <exec executable="npm" dir=".">
+            <arg value="test"/>
+        </exec>
+    </target>
+    
+    <!-- Build the application -->
+    <target name="build" depends="test">
+        <exec executable="npm" dir=".">
+            <arg value="run"/>
+            <arg value="build"/>
+        </exec>
+    </target>
+    
+    <!-- Package the application -->
+    <target name="package" depends="build">
+        <zip destfile="${dist.dir}/app-${DSTAMP}.zip" 
+             basedir="." 
+             includes="**/*" 
+             excludes="node_modules/**, build/**, dist/**, .git/**, .gitignore"/>
+    </target>
+    
+    <!-- Main deployment target -->
+    <target name="deploy" depends="package">
+        <echo message="Application packaged at ${dist.dir}/app-${DSTAMP}.zip"/>
+    </target>
+</project>
